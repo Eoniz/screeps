@@ -1,6 +1,6 @@
 {
   "main": {
-    "token": "601057ff-9359-4ab7-ba0d-81e6758c14f4",
+    "token": "YOUR_TOKEN",
     "protocol": "https",
     "hostname": "screeps.com",
     "port": 443,
