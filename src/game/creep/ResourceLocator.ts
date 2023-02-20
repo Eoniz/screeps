@@ -1,42 +1,53 @@
-import {HarvesterHandler} from "./handlers/HarvesterHandler";
-import {HarvestUseCase} from "./usecases/HarvestUseCase";
-import {DropResourcesUseCase} from "./usecases/DropResourcesUseCase";
-import {ResourcesServiceImpl} from "./services/ResourcesServiceImpl";
-import {BuilderHandler} from "./handlers/BuilderHandler";
-import {UpgraderHandler} from "./handlers/UpgraderHandler";
+import {HarvesterController} from "./controllers/HarvesterController";
+import {BuilderController} from "./controllers/BuilderController";
+import {UpgraderController} from "./controllers/UpgraderController";
+import {ResourcesServiceImpl} from "./services/resources/ResourcesServiceImpl";
+import {HarvestNearestSourceUseCase} from "./usecases/resources/HarvestNearestSourceUseCase";
+import {DropResourcesUseCase} from "./usecases/resources/DropResourcesUseCase";
+import {ControllerServiceImpl} from "./services/controller/ControllerServiceImpl";
+import {UpgradeRoomControllerUseCase} from "./usecases/controller/UpgradeRoomControllerUseCase";
+import {HarvestSourceByCreepIdUseCase} from "./usecases/resources/HarvestSourceByCreepIdUseCase";
+import {BuildingServiceImpl} from "./services/building/BuildingServiceImpl";
+import {BuildNearestUseCase} from "./usecases/building/BuildNearestUseCase";
 
-export function provideHarvesterHandler() {
+export function provideHarvesterController() {
   const resourcesService = new ResourcesServiceImpl();
 
-  const harvestUseCase = new HarvestUseCase(resourcesService);
+  const harvestUseCase = new HarvestSourceByCreepIdUseCase(resourcesService);
   const dropResourcesUseCase = new DropResourcesUseCase(resourcesService);
 
-  return new HarvesterHandler(
+  return new HarvesterController(
     harvestUseCase,
     dropResourcesUseCase,
   );
 }
 
-export function provideUpgraderHandler() {
+export function provideBuilderController() {
   const resourcesService = new ResourcesServiceImpl();
+  const buildingService = new BuildingServiceImpl();
 
-  const harvestUseCase = new HarvestUseCase(resourcesService);
+  const harvestUseCase = new HarvestSourceByCreepIdUseCase(resourcesService);
+  const buildNearestUseCase = new BuildNearestUseCase(buildingService);
   const dropResourcesUseCase = new DropResourcesUseCase(resourcesService);
 
-  return new BuilderHandler(
+  return new BuilderController(
     harvestUseCase,
+    buildNearestUseCase,
     dropResourcesUseCase,
   );
 }
 
-export function provideBuilderHandler() {
+export function provideUpgraderController() {
   const resourcesService = new ResourcesServiceImpl();
+  const controllerService = new ControllerServiceImpl();
 
-  const harvestUseCase = new HarvestUseCase(resourcesService);
+  const harvestUseCase = new HarvestSourceByCreepIdUseCase(resourcesService);
+  const upgradeRoomControllerUseCase = new UpgradeRoomControllerUseCase(controllerService);
   const dropResourcesUseCase = new DropResourcesUseCase(resourcesService);
 
-  return new UpgraderHandler(
+  return new UpgraderController(
     harvestUseCase,
+    upgradeRoomControllerUseCase,
     dropResourcesUseCase,
   );
 }

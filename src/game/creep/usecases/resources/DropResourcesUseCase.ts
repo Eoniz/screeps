@@ -1,4 +1,4 @@
-import {ResourcesService} from "../services/ResourcesService";
+import {ResourcesService} from "../../services/resources/ResourcesService";
 
 export class DropResourcesUseCase {
 

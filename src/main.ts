@@ -1,7 +1,7 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import {CreepType} from "./game/creep/CreepType";
 import {CreepFactory} from "./game/factory/CreepFactory";
-import {provideBuilderHandler, provideHarvesterHandler, provideUpgraderHandler} from "./game/creep/ResourceLocator";
+import {provideBuilderController, provideHarvesterController, provideUpgraderController} from "./game/creep/ResourceLocator";
 import {CreepTypeVisitor} from "./game/creep/CreepTypeVisitor";
 
 declare global {
@@ -21,6 +21,7 @@ declare global {
 
   interface CreepMemory {
     role: string;
+    id: number;
     [K: string]: any;
   }
 
@@ -32,15 +33,15 @@ declare global {
   }
 }
 
-const harvesterHandler = provideHarvesterHandler();
-const upgraderHandler = provideUpgraderHandler();
-const builderHandler = provideBuilderHandler();
+const harvesterController = provideHarvesterController();
+const upgraderController = provideUpgraderController();
+const builderController = provideBuilderController();
 
 const CREEPS: Map<CreepType, number> = new Map();
 
-CREEPS.set(CreepType.HARVESTER, 2);
-CREEPS.set(CreepType.UPGRADER, 2);
-CREEPS.set(CreepType.BUILDER, 2);
+CREEPS.set(CreepType.HARVESTER, 5);
+CREEPS.set(CreepType.UPGRADER, 5);
+CREEPS.set(CreepType.BUILDER, 5);
 
 const handleCreepSpawning = () => {
   if (!Game.spawns['Spawn1'].spawning) {
@@ -58,20 +59,67 @@ const handleCreepSpawning = () => {
 }
 
 const handleSpawn = () => {
+  const creepsToCreate: Map<CreepType, number> = new Map();
+
   for (const [creepType, limit] of CREEPS) {
-    const existingCreeps = Object.values(Game.creeps).filter((creep) => creep.memory.role === creepType.kind);
-
-    if (existingCreeps.length < limit) {
-      const creepToBuild = CreepFactory.build(creepType);
-
-      Game.spawns['Spawn1'].spawnCreep(
-        creepToBuild.actions,
-        creepToBuild.name,
-        creepToBuild.opts,
-      );
-
-      break;
+    if (creepsToCreate.has(creepType)) {
+      creepsToCreate.set(creepType, 0);
     }
+
+    const existingCreeps = Object.values(Game.creeps).filter((creep) => creep.memory.role === creepType.kind);
+    const numberToCreate = limit - existingCreeps.length;
+    creepsToCreate.set(creepType, numberToCreate);
+  }
+
+  if (!creepsToCreate.size) {
+    return;
+  }
+
+  const highest = (
+    [...creepsToCreate.entries()]
+      .reduce((prev, curr) => prev[1] > curr[1] ? prev : curr)
+  );
+
+  console.log(
+    'Create queue: ',
+    [...creepsToCreate.entries()]
+      .map(([creepType, numberToCreate]) => `${creepType.kind}: ${numberToCreate}`).join(' | ')
+  );
+
+  const creepType = highest[0];
+
+  const creepToBuild = CreepFactory.build(creepType);
+
+  Game.spawns['Spawn1'].spawnCreep(
+    creepToBuild.actions,
+    creepToBuild.name,
+    creepToBuild.opts,
+  );
+}
+
+const handleGameTick = () => {
+  const creepGameTickVisitor: CreepTypeVisitor<(creep: Creep) => void> = {
+    builder: () => {
+      return (creep: Creep) => {
+        builderController.gameTick(creep);
+      };
+    },
+    upgrader: () => {
+      return (creep: Creep) => {
+        upgraderController.gameTick(creep);
+      };
+    },
+    harvester: () => {
+      return (creep: Creep) => {
+        harvesterController.gameTick(creep);
+      }
+    }
+  }
+
+  for (const [name, creep] of Object.entries(Game.creeps)) {
+    const creepType = CreepType.fromType(creep.memory.role);
+    const gameTick = creepType.accept(creepGameTickVisitor);
+    gameTick(creep);
   }
 }
 
@@ -88,28 +136,5 @@ export const loop = ErrorMapper.wrapLoop(() => {
   }
 
   handleCreepSpawning();
-
-  const creepGameTickVisitor: CreepTypeVisitor<(creep: Creep) => void> = {
-    builder: () => {
-      return (creep: Creep) => {
-        builderHandler.gameTick(creep);
-      };
-    },
-    upgrader: () => {
-      return (creep: Creep) => {
-        upgraderHandler.gameTick(creep);
-      };
-    },
-    harvester: () => {
-      return (creep: Creep) => {
-        harvesterHandler.gameTick(creep);
-      }
-    }
-  }
-
-  for (const [name, creep] of Object.entries(Game.creeps)) {
-    const creepType = CreepType.fromType(creep.memory.role);
-    const gameTick = creepType.accept(creepGameTickVisitor);
-    gameTick(creep);
-  }
+  handleGameTick();
 });

@@ -33,6 +33,7 @@ export class CreepFactory {
       opts: {
         memory: {
           role: creepType.kind,
+          id: Game.time,
         }
       }
     }
@@ -45,6 +46,7 @@ export class CreepFactory {
       opts: {
         memory: {
           role: creepType.kind,
+          id: Game.time,
         }
       }
     }
@@ -57,6 +59,7 @@ export class CreepFactory {
       opts: {
         memory: {
           role: creepType.kind,
+          id: Game.time,
         }
       }
     }
