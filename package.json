@@ -6,18 +6,18 @@
   "//": "If you add or change the names of destinations in screeps.json, make sure you update these scripts to reflect the changes",
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
-    "build": "cp ./rollup ./rollup.config.js && rollup -c",
-    "push-main": "cp ./rollup ./rollup.config.js && rollup -c --environment DEST:main",
-    "push-pserver": "cp ./rollup ./rollup.config.js && rollup -c --environment DEST:pserver",
-    "push-season": "cp ./rollup ./rollup.config.js && rollup -c --environment DEST:season",
-    "push-sim": "cp ./rollup ./rollup.config.js && rollup -c --environment DEST:sim",
+    "build": "rm rollup.config.js && cp ./rollup ./rollup.config.js && rollup -c",
+    "push-main": "rm rollup.config.js && cp ./rollup ./rollup.config.js && rollup -c --environment DEST:main",
+    "push-pserver": "rm rollup.config.js && cp ./rollup ./rollup.config.js && rollup -c --environment DEST:pserver",
+    "push-season": "rm rollup.config.js && cp ./rollup ./rollup.config.js && rollup -c --environment DEST:season",
+    "push-sim": "rm rollup.config.js && cp ./rollup ./rollup.config.js && rollup -c --environment DEST:sim",
     "test": "npm run test-unit",
     "test-unit": "mocha test/unit/**/*.ts",
     "test-integration": "echo 'See docs/in-depth/testing.md for instructions on enabling integration tests'",
     "watch-main": "rollup -cw --environment DEST:main",
     "watch-pserver": "rollup -cw --environment DEST:pserver",
     "watch-season": "rollup -cw --environment DEST:season",
-    "watch-sim": "cp ./rollup ./rollup.config.js && rollup -cw --environment DEST:sim"
+    "watch-sim": "rm rollup.config.js && cp ./rollup ./rollup.config.js && rollup -cw --environment DEST:sim"
   },
   "repository": {
     "type": "git",
