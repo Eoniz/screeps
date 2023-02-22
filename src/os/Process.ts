@@ -122,7 +122,7 @@ export abstract class Process<T extends ProcessType> {
     return this._ticked;
   }
 
-  protected get type() {
+  public get type() {
     return this._type;
   }
 

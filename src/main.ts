@@ -1,8 +1,9 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import {Process} from "./os/Process";
-import {KER_INIT_PROCESS, ProcessType} from "./os/ProcessType";
+import {KER_COL_SOURCE_PROCESS, KER_COL_SPAWN_QUEUE_PROCESS, KER_INIT_PROCESS, ProcessType} from "./os/ProcessType";
 import {Kernel} from "./os/Kernel";
 import {Colony} from "./screeps/Colony";
+import {CreepType} from "./factories/CreepFactory";
 
 declare global {
   /*
@@ -14,9 +15,37 @@ declare global {
     Interfaces matching on name from @types/screeps will be merged. This is how you can extend the 'built-in' interfaces from @types/screeps.
   */
 
+  interface SerializedCreepToSpawn {
+    type: CreepType;
+    priority: number;
+    meta: Record<string, unknown>;
+  }
+
+  interface SerializedSource {
+    id: string;
+    energy: number;
+    energyCapacity: number;
+  }
+
+  interface SerializedRoom {
+    name: string;
+  }
+
+  interface SerializedSourceContainer {
+    id: string;
+    sourceId: string;
+  }
+
+  interface SerializedColony {
+    rooms: Array<SerializedRoom>;
+    sources: Record<string, SerializedSource>;
+    sourceContainers: Record<string, SerializedSourceContainer>;
+    spawnQueue: Array<SerializedCreepToSpawn>;
+  }
+
   interface MemoryKernel {
     processTable: Record<string, SerializedProcess<ProcessType>>;
-    colonies: Record<string, Colony>;
+    colonies: Record<string, SerializedColony>;
   }
 
   interface SerializedProcess<T extends ProcessType> {
@@ -35,6 +64,8 @@ declare global {
   type ProcessMetaData = {
     [processType: string]: DefaultProcessMetaData,
     [KER_INIT_PROCESS]: DefaultProcessMetaData & {},
+    [KER_COL_SPAWN_QUEUE_PROCESS]: DefaultProcessMetaData & { colonyProcessName: string; },
+    [KER_COL_SOURCE_PROCESS]: DefaultProcessMetaData & { sourceId: string, colonyProcessName: string; },
   }
 
   // Memory extension samples
@@ -45,8 +76,7 @@ declare global {
   }
 
   interface CreepMemory {
-    role: string;
-    id: number;
+    type: string;
     [K: string]: any;
   }
 

@@ -1,13 +1,23 @@
-import {KER_COL_PROCESS, KER_INIT_PROCESS, ProcessType} from "./ProcessType";
+import {
+  KER_COL_PROCESS,
+  KER_COL_SOURCE_PROCESS,
+  KER_COL_SPAWN_QUEUE_PROCESS,
+  KER_INIT_PROCESS,
+  ProcessType
+} from "./ProcessType";
 import {InitProcess} from "./processes/system/InitProcess";
 import {Process} from "./Process";
 import {ProcessDoesNotExistException} from "./exceptions/ProcessDoesNotExistException";
 import {ColonyProcess} from "./processes/colony/ColonyProcess";
 import {Empire} from "../screeps/Empire";
+import {ColonySpawnQueueProcess} from "./processes/colony/ColonySpawnQueueProcess";
+import {ColonySourceProcess} from "./processes/colony/ColonySourceProcess";
 
 const processTypes: Record<ProcessType, new (...args: any[]) => Process<ProcessType>> = {
   [KER_INIT_PROCESS]: InitProcess,
   [KER_COL_PROCESS]: ColonyProcess,
+  [KER_COL_SPAWN_QUEUE_PROCESS]: ColonySpawnQueueProcess,
+  [KER_COL_SOURCE_PROCESS]: ColonySourceProcess,
 }
 
 export class Kernel {
@@ -129,6 +139,15 @@ export class Kernel {
     }
 
     throw new ProcessDoesNotExistException(name);
+  }
+
+  public getProcess(type: ProcessType, name: string) {
+    const process = this.getProcessByName(name);
+    if (process.type !== type) {
+      throw new ProcessDoesNotExistException(name);
+    }
+
+    return process;
   }
 
   public removeProcess(name: string) {

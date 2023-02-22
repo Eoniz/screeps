@@ -25,4 +25,10 @@ export class RoomUtils {
     return room.controller.my;
   }
 
+  public static serializedRoom(room: Room): SerializedRoom {
+    return {
+      name: room.name,
+    }
+  }
+
 }
