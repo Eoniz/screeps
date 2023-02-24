@@ -1,5 +1,7 @@
-import {ProcessType} from "./ProcessType";
+import {KER_COL_PROCESS, ProcessType} from "./ProcessType";
 import {Kernel} from "./Kernel";
+import {extend} from "lodash";
+import {ColonyProcess} from "./processes/colony/ColonyProcess";
 
 export abstract class Process<T extends ProcessType> {
 
@@ -137,4 +139,59 @@ export abstract class Process<T extends ProcessType> {
 
     return Game.rooms[this.metaData.roomName];
   }
+}
+
+export abstract class CreepLifetimeProcess<T extends ProcessType> extends Process<T> {
+
+  public get colonyProcess() {
+    if (!this.metaData.colonyProcessName) {
+      return null;
+    }
+
+    let colonyProcess!: ColonyProcess;
+    try {
+      colonyProcess = <ColonyProcess> this.kernel.getProcess(KER_COL_PROCESS, this.metaData.colonyProcessName);
+    } catch (ignored) {
+      return null;
+    }
+
+    if (colonyProcess.isCompleted) {
+      return null;
+    }
+
+    return colonyProcess;
+  }
+
+  public get colony() {
+    if (!this.colonyProcess) {
+      return null;
+    }
+
+    const colony = this.colonyProcess.colony;
+
+    if (!colony) {
+      return null;
+    }
+
+    return colony;
+  }
+
+  public get creep() {
+    if (!this.metaData.creep) {
+      console.log("creep does not exist in metadata");
+      this.completed();
+      return null;
+    }
+
+    const maybeCreep = Game.creeps[this.metaData.creep];
+    console.log(JSON.stringify(Object.keys(Game.creeps)));
+    if (!maybeCreep) {
+      console.log(`creep ${this.metaData.creep} not found in game.creeps`);
+      this.completed();
+      return null;
+    }
+
+    return maybeCreep;
+  }
+
 }

@@ -55,6 +55,8 @@ export class ColonyProcess extends Process<'colony'> {
           roomName: _source.room.name,
           colonyProcessName: this.name,
           sourceId: _source.id,
+          nextCreepName: null,
+          creeps: [],
         }
       );
     });

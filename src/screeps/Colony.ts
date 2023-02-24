@@ -2,6 +2,9 @@ import {Empire} from "./Empire";
 import {RoomUtils} from "../utils/RoomUtils";
 import {CreepType} from "../factories/CreepFactory";
 
+export const STATE_QUEUE = 1;
+export const STATE_SPAWNING = 2;
+
 export class Colony {
 
   private readonly _empire: Empire;
@@ -10,7 +13,7 @@ export class Colony {
   private readonly _rooms!: Array<Room>;
   private readonly _sources!: Record<string, Source>;
   private readonly _spawners!: Array<StructureSpawn>;
-  private readonly _spawnQueue!: Array<SerializedCreepToSpawn>;
+  private _spawnQueue!: Array<SerializedCreepToSpawn>;
 
   constructor(
     coreRoom: string,
@@ -48,15 +51,27 @@ export class Colony {
     }
   }
 
-  public spawnCreep(creepType: CreepType, meta: Record<string, unknown> = {}, priority: number = 1) {
+  public spawnCreep(
+    identifier: string,
+    creepName: string,
+    creepType: CreepType,
+    meta: Record<string, unknown> = {},
+    priority: number = 1
+  ) {
+    if (this.checkSpawningQueue(identifier) !== false) {
+      return;
+    }
+
     const creenToSpawn = {
+      identifier: identifier,
       meta: meta,
+      creepName: creepName,
       type: creepType,
       priority: priority,
     } satisfies SerializedCreepToSpawn;
 
     this._spawnQueue.push(creenToSpawn);
-    Memory.kernel.colonies[this._coreRoom.name].spawnQueue.push(creenToSpawn);
+    Memory.kernel.colonies[this._coreRoom.name].spawnQueue = [...this._spawnQueue];
 
     return creenToSpawn;
   }
@@ -67,15 +82,18 @@ export class Colony {
     }
 
     return (
-      [...this._spawnQueue]
+      Object.values(this._spawnQueue)
         .sort((a, b) => b.priority - a.priority)[0]
     );
   }
 
-  public removeFirstCreepFromSpawnQueue() {
-    const removedCreep = this._spawnQueue.pop() ?? null;
-    Memory.kernel.colonies[this._coreRoom.name].spawnQueue = this._spawnQueue;
-    return removedCreep;
+  public removeCreepFromSpawnQueue(identifier: string) {
+    this._spawnQueue = this._spawnQueue.filter((creep) => creep.identifier !== identifier);
+    Memory.kernel.colonies[this._coreRoom.name].spawnQueue = (
+      Memory.kernel.colonies[this._coreRoom.name].spawnQueue.filter((creep) => {
+        return creep.identifier !== identifier
+      })
+    );
   }
 
   private initialize() {
@@ -94,8 +112,8 @@ export class Colony {
 
   private loadSpawnQueueFromKernelMemory() {
     Memory.kernel.colonies[this._coreRoom.name].spawnQueue
-      .forEach((_creepToSpawn) => {
-        this._spawnQueue.push({..._creepToSpawn});
+      .forEach((creepToSpawn) => {
+        this._spawnQueue.push({...creepToSpawn});
       });
   }
 
@@ -210,6 +228,25 @@ export class Colony {
     }
 
     return null;
+  }
+
+  public checkSpawningQueue(identifier: string) {
+    const maybeSpawner = this.spawners.find((spawner) => {
+      return spawner.spawning && spawner.memory.identifier === identifier;
+    });
+
+    if (maybeSpawner) {
+      return STATE_SPAWNING;
+    }
+
+    const creepInSpawnQueue = Memory.kernel.colonies[this.coreRoom.name].spawnQueue.filter((creep) => {
+      return creep.identifier === identifier
+    });
+
+    if (creepInSpawnQueue.length > 0) {
+      return STATE_QUEUE;
+    }
+    return false;
   }
 
   public get sources() {

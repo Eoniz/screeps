@@ -29,7 +29,7 @@ export class ColonySpawnQueueProcess extends Process<'colony-spawn-queue'> {
     }
 
 
-    const spawners = colonyProcess.colony.spawners.filter((_spawner) => !_spawner.spawning);
+    const spawners = colonyProcess.colony.spawners.filter((_spawner) => _spawner.spawning === null);
 
     if (!spawners.length) {
       this.log("No spawner available for now");
@@ -41,7 +41,7 @@ export class ColonySpawnQueueProcess extends Process<'colony-spawn-queue'> {
 
     const spawnCreepResult = spawner.spawnCreep(
       body.body,
-      `${nextCreepToSpawn.type}-${Game.time}`,
+      nextCreepToSpawn.creepName,
       {
         memory: {
           type: nextCreepToSpawn.type,
@@ -51,9 +51,9 @@ export class ColonySpawnQueueProcess extends Process<'colony-spawn-queue'> {
     );
 
     if (spawnCreepResult === OK) {
-      this.log(`Spawning a ${nextCreepToSpawn.type}`);
-
-      colonyProcess.colony.removeFirstCreepFromSpawnQueue();
+      this.log(`Spawning a ${nextCreepToSpawn.type} with name ${nextCreepToSpawn.creepName} and identifier ${nextCreepToSpawn.identifier}`);
+      spawner.memory.identifier = nextCreepToSpawn.identifier;
+      colonyProcess.colony.removeCreepFromSpawnQueue(nextCreepToSpawn.identifier);
     } else {
       this.log(`Unable to spawn ${nextCreepToSpawn.type} for now`);
     }

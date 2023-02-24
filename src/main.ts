@@ -1,6 +1,12 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import {Process} from "./os/Process";
-import {KER_COL_SOURCE_PROCESS, KER_COL_SPAWN_QUEUE_PROCESS, KER_INIT_PROCESS, ProcessType} from "./os/ProcessType";
+import {
+  KER_COL_SOURCE_PROCESS,
+  KER_COL_SPAWN_QUEUE_PROCESS, KER_CREEP_ACTION_BUILD, KER_CREEP_ACTION_DROP_RESOURCES, KER_CREEP_ACTION_HARVEST,
+  KER_CREEP_HARVESTER_LIFETIME_PROCESS,
+  KER_INIT_PROCESS,
+  ProcessType
+} from "./os/ProcessType";
 import {Kernel} from "./os/Kernel";
 import {Colony} from "./screeps/Colony";
 import {CreepType} from "./factories/CreepFactory";
@@ -16,6 +22,8 @@ declare global {
   */
 
   interface SerializedCreepToSpawn {
+    identifier: string,
+    creepName: string;
     type: CreepType;
     priority: number;
     meta: Record<string, unknown>;
@@ -43,6 +51,10 @@ declare global {
     spawnQueue: Array<SerializedCreepToSpawn>;
   }
 
+  interface SpawnMemory {
+    identifier?: string;
+  }
+
   interface MemoryKernel {
     processTable: Record<string, SerializedProcess<ProcessType>>;
     colonies: Record<string, SerializedColony>;
@@ -59,13 +71,32 @@ declare global {
 
   type DefaultProcessMetaData = {
     roomName?: string;
+    creep?: string;
+    colonyProcessName?: string;
   }
 
   type ProcessMetaData = {
     [processType: string]: DefaultProcessMetaData,
     [KER_INIT_PROCESS]: DefaultProcessMetaData & {},
     [KER_COL_SPAWN_QUEUE_PROCESS]: DefaultProcessMetaData & { colonyProcessName: string; },
-    [KER_COL_SOURCE_PROCESS]: DefaultProcessMetaData & { sourceId: string, colonyProcessName: string; },
+    [KER_COL_SOURCE_PROCESS]: DefaultProcessMetaData & {
+      creeps: Array<string>;
+      sourceId: string;
+      colonyProcessName: string;
+      nextCreepName: string | null;
+    },
+    [KER_CREEP_HARVESTER_LIFETIME_PROCESS]: DefaultProcessMetaData & {
+      source: string;
+    },
+    [KER_CREEP_ACTION_HARVEST]: DefaultProcessMetaData & {
+      source: string;
+    },
+    [KER_CREEP_ACTION_BUILD]: DefaultProcessMetaData & {
+      structure: string;
+    },
+    [KER_CREEP_ACTION_DROP_RESOURCES]: DefaultProcessMetaData & {
+      spawner: string;
+    }
   }
 
   // Memory extension samples

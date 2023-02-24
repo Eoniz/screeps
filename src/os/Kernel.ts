@@ -2,6 +2,10 @@ import {
   KER_COL_PROCESS,
   KER_COL_SOURCE_PROCESS,
   KER_COL_SPAWN_QUEUE_PROCESS,
+  KER_CREEP_ACTION_BUILD,
+  KER_CREEP_ACTION_DROP_RESOURCES,
+  KER_CREEP_ACTION_HARVEST,
+  KER_CREEP_HARVESTER_LIFETIME_PROCESS,
   KER_INIT_PROCESS,
   ProcessType
 } from "./ProcessType";
@@ -12,12 +16,20 @@ import {ColonyProcess} from "./processes/colony/ColonyProcess";
 import {Empire} from "../screeps/Empire";
 import {ColonySpawnQueueProcess} from "./processes/colony/ColonySpawnQueueProcess";
 import {ColonySourceProcess} from "./processes/colony/ColonySourceProcess";
+import {CreepHarvesterLifetimeProcess} from "./processes/creep/harvester/CreepHarvesterLifetimeProcess";
+import {CreepHarvestActionProcess} from "./processes/creep/action/CreepHarvestActionProcess";
+import {CreepBuildActionProcess} from "./processes/creep/action/CreepBuildActionProcess";
+import {CreepDropResourceActionProcess} from "./processes/creep/action/CreepDropResourceActionProcess";
 
 const processTypes: Record<ProcessType, new (...args: any[]) => Process<ProcessType>> = {
   [KER_INIT_PROCESS]: InitProcess,
   [KER_COL_PROCESS]: ColonyProcess,
   [KER_COL_SPAWN_QUEUE_PROCESS]: ColonySpawnQueueProcess,
   [KER_COL_SOURCE_PROCESS]: ColonySourceProcess,
+  [KER_CREEP_HARVESTER_LIFETIME_PROCESS]: CreepHarvesterLifetimeProcess,
+  [KER_CREEP_ACTION_HARVEST]: CreepHarvestActionProcess,
+  [KER_CREEP_ACTION_BUILD]: CreepBuildActionProcess,
+  [KER_CREEP_ACTION_DROP_RESOURCES]: CreepDropResourceActionProcess,
 }
 
 export class Kernel {
@@ -42,11 +54,8 @@ export class Kernel {
   }
 
   private loadProcessTable() {
-    console.log(JSON.stringify(Memory.kernel.processTable));
     Object.entries(Memory.kernel.processTable)
       .forEach(([processName, serializedProcess]) => {
-        console.log(JSON.stringify(processName), JSON.stringify(serializedProcess));
-
         if (serializedProcess.type in processTypes) {
           this._processTable[processName] = new processTypes[serializedProcess.type](serializedProcess, this);
         } else {
