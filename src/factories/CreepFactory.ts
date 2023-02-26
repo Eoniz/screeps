@@ -2,6 +2,7 @@
 export type CreepType =
   | "harvester"
   | "transporter"
+  | "upgrader"
   ;
 
 // https://screeps.fandom.com/wiki/Creep
@@ -19,11 +20,13 @@ const PART_COST: Record<BodyPartConstant, number> = {
 const STANDARD_CREEP: Record<CreepType, Array<BodyPartConstant>> = {
   harvester: [WORK, WORK, CARRY, MOVE],
   transporter: [CARRY, MOVE],
+  upgrader: [MOVE, CARRY, WORK],
 };
 
 const EXTANDED_CREEP: Record<CreepType, Array<BodyPartConstant>> = {
   harvester: [WORK, MOVE],
   transporter: [CARRY, MOVE],
+  upgrader: [CARRY, WORK, MOVE]
 };
 
 export class CreepFactory {

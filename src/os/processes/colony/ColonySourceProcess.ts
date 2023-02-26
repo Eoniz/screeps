@@ -36,6 +36,24 @@ export class ColonySourceProcess extends Process<'colony-source-process'> {
       return;
     }
 
+    this.metaData.creeps = this.metaData.creeps.filter((creepName) => {
+      const maybeCreep = Game.creeps[creepName];
+
+      if (!maybeCreep) {
+        return false;
+      }
+
+      if (maybeCreep.spawning) {
+        return true;
+      }
+
+      if (maybeCreep.ticksToLive === 0) {
+        return false;
+      }
+
+      return true;
+    });
+
     this.checkContainer(colony, source);
     this.checkSpawn(colony, source);
   }
@@ -44,6 +62,11 @@ export class ColonySourceProcess extends Process<'colony-source-process'> {
   }
 
   private checkSpawn(colony: Colony, source: Source) {
+    if (this.metaData.creeps.length >= 2) {
+      // No spawn when source having at least 2 creeps
+      return;
+    }
+
     if (source.pos.roomName !== colony.coreRoom.name) {
       return;
     }

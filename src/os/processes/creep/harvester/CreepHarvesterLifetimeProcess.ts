@@ -1,5 +1,6 @@
 import {CreepLifetimeProcess} from "../../../Process";
 import {KER_CREEP_ACTION_BUILD, KER_CREEP_ACTION_DROP_RESOURCES, KER_CREEP_ACTION_HARVEST} from "../../../ProcessType";
+import * as console from "console";
 
 export class CreepHarvesterLifetimeProcess extends CreepLifetimeProcess<'creep-harvester-lifetime-process'> {
 
@@ -49,13 +50,52 @@ export class CreepHarvesterLifetimeProcess extends CreepLifetimeProcess<'creep-h
       return;
     }
 
+    if (this.checkForSpawnQueue(creep, source.room)) {
+      return;
+    }
+
     if (this.checkForBuilding(creep, source)) {
       return;
     }
 
-    if (this.checkForSpawnQueue(creep, source.room)) {
+    if (this.checkForSourceContainer(creep, source)) {
       return;
     }
+  }
+
+  private checkForSourceContainer(creep: Creep, source: Source) {
+    const availableContainers = source.pos.findInRange(
+      FIND_STRUCTURES,
+      1,
+      {
+        filter: (structure) => {
+          return (
+            structure.structureType === STRUCTURE_CONTAINER
+            && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+          );
+        }
+      }
+    );
+
+    if (!availableContainers.length) {
+      return false;
+    }
+
+    const container = availableContainers[0];
+
+    this.fork(
+      KER_CREEP_ACTION_DROP_RESOURCES,
+      `drop-resources-${this.name}`,
+      this.priority - 1,
+      {
+        creep: creep.name,
+        colonyProcessName: this.metaData.colonyProcessName,
+        roomName: source.room.name,
+        target: container.id,
+      }
+    );
+
+    return true;
   }
 
   private checkForSpawnQueue(creep: Creep, room: Room) {
@@ -74,6 +114,7 @@ export class CreepHarvesterLifetimeProcess extends CreepLifetimeProcess<'creep-h
     const sortedSpawners = (
       this.colony.spawners
         .filter((a) => !!a.memory.identifier && !a.spawning)
+        .filter((a) => creep.pos.getRangeTo(a) <= 15)
         .sort((a, b) => creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b))
     );
 
@@ -93,7 +134,7 @@ export class CreepHarvesterLifetimeProcess extends CreepLifetimeProcess<'creep-h
         creep: creep.name,
         colonyProcessName: this.metaData.colonyProcessName,
         roomName: room.name,
-        spawner: spawner.id,
+        target: spawner.id,
       }
     );
 
@@ -102,8 +143,7 @@ export class CreepHarvesterLifetimeProcess extends CreepLifetimeProcess<'creep-h
 
   private checkForBuilding(creep: Creep, source: Source) {
     const structures = (
-      source.room
-        .find(FIND_CONSTRUCTION_SITES)
+      source.pos.findInRange(FIND_CONSTRUCTION_SITES, 3)
         .sort((a, b) => creep.pos.getRangeTo(a) - creep.pos.getRangeTo(b))
     );
 

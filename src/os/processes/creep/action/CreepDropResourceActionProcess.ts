@@ -15,28 +15,27 @@ export class CreepDropResourceActionProcess extends CreepLifetimeProcess<'creep-
       return;
     }
 
-    if (!this.spawner) {
-      this.log("❌ no spawner found, aborting");
+    if (!this.target) {
+      this.log("❌ no target found, aborting");
 
-      this.creep.suicide();
       this.completed();
       return;
     }
 
-    this.handleLogic(this.creep, this.spawner);
+    this.handleLogic(this.creep, this.target);
   }
 
   protected postRun(): void {
   }
 
-  private handleLogic(creep: Creep, spawner: StructureSpawn) {
+  private handleLogic(creep: Creep, targetStructure: Structure) {
     if (creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
       this.completed();
       this.resumeParent();
       return;
     }
 
-    const transferResult = creep.transfer(spawner, RESOURCE_ENERGY);
+    const transferResult = creep.transfer(targetStructure, RESOURCE_ENERGY);
     if (transferResult === OK) {
       this.completed();
       this.resumeParent();
@@ -44,14 +43,14 @@ export class CreepDropResourceActionProcess extends CreepLifetimeProcess<'creep-
     }
 
     if (transferResult === ERR_NOT_IN_RANGE) {
-      creep.moveTo(spawner);
+      creep.moveTo(targetStructure);
       return;
     }
 
     this.log("❌ unhandled error");
   }
 
-  private get spawner() {
+  private get target() {
     if (!this.room) {
       this.log("❌ no room found, aborting");
 
@@ -59,15 +58,8 @@ export class CreepDropResourceActionProcess extends CreepLifetimeProcess<'creep-
       return;
     }
 
-    const sources = this.room.find(
-      FIND_MY_SPAWNS,
-      {
-        filter: (spawner) => {
-          return spawner.id === this.metaData.spawner;
-        }
-      }
-    );
+    const maybeTarget = Game.getObjectById(<Id<Structure>> this.metaData.target);
 
-    return sources[0] ?? null;
+    return maybeTarget ?? null;
   }
 }

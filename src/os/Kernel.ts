@@ -1,11 +1,12 @@
 import {
+  KER_COL_CONTROLLER_PROCESS,
   KER_COL_PROCESS,
   KER_COL_SOURCE_PROCESS,
   KER_COL_SPAWN_QUEUE_PROCESS,
   KER_CREEP_ACTION_BUILD,
   KER_CREEP_ACTION_DROP_RESOURCES,
-  KER_CREEP_ACTION_HARVEST,
-  KER_CREEP_HARVESTER_LIFETIME_PROCESS,
+  KER_CREEP_ACTION_HARVEST, KER_CREEP_ACTION_PULL_RESOURCE, KER_CREEP_ACTION_UPGRADE_CONTROLLER,
+  KER_CREEP_HARVESTER_LIFETIME_PROCESS, KER_CREEP_UPGRADER_LIFETIME_PROCESS,
   KER_INIT_PROCESS,
   ProcessType
 } from "./ProcessType";
@@ -20,6 +21,10 @@ import {CreepHarvesterLifetimeProcess} from "./processes/creep/harvester/CreepHa
 import {CreepHarvestActionProcess} from "./processes/creep/action/CreepHarvestActionProcess";
 import {CreepBuildActionProcess} from "./processes/creep/action/CreepBuildActionProcess";
 import {CreepDropResourceActionProcess} from "./processes/creep/action/CreepDropResourceActionProcess";
+import {ColonyControllerProcess} from "./processes/colony/ColonyControllerProcess";
+import {CreepUpgraderLifetimeProcess} from "./processes/creep/upgrader/CreepUpgraderLifetimeProcess";
+import {CreepUpgradeControllerProcess} from "./processes/creep/action/CreepUpgradeControllerProcess";
+import {CreepPullResourceActionProcess} from "./processes/creep/action/CreepPullResourceActionProcess";
 
 const processTypes: Record<ProcessType, new (...args: any[]) => Process<ProcessType>> = {
   [KER_INIT_PROCESS]: InitProcess,
@@ -30,6 +35,10 @@ const processTypes: Record<ProcessType, new (...args: any[]) => Process<ProcessT
   [KER_CREEP_ACTION_HARVEST]: CreepHarvestActionProcess,
   [KER_CREEP_ACTION_BUILD]: CreepBuildActionProcess,
   [KER_CREEP_ACTION_DROP_RESOURCES]: CreepDropResourceActionProcess,
+  [KER_COL_CONTROLLER_PROCESS]: ColonyControllerProcess,
+  [KER_CREEP_UPGRADER_LIFETIME_PROCESS]: CreepUpgraderLifetimeProcess,
+  [KER_CREEP_ACTION_UPGRADE_CONTROLLER]: CreepUpgradeControllerProcess,
+  [KER_CREEP_ACTION_PULL_RESOURCE]: CreepPullResourceActionProcess,
 }
 
 export class Kernel {

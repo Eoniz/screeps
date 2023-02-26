@@ -1,9 +1,15 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import {Process} from "./os/Process";
 import {
+  KER_COL_CONTROLLER_PROCESS,
   KER_COL_SOURCE_PROCESS,
-  KER_COL_SPAWN_QUEUE_PROCESS, KER_CREEP_ACTION_BUILD, KER_CREEP_ACTION_DROP_RESOURCES, KER_CREEP_ACTION_HARVEST,
+  KER_COL_SPAWN_QUEUE_PROCESS,
+  KER_CREEP_ACTION_BUILD,
+  KER_CREEP_ACTION_DROP_RESOURCES,
+  KER_CREEP_ACTION_HARVEST, KER_CREEP_ACTION_PULL_RESOURCE,
+  KER_CREEP_ACTION_UPGRADE_CONTROLLER,
   KER_CREEP_HARVESTER_LIFETIME_PROCESS,
+  KER_CREEP_UPGRADER_LIFETIME_PROCESS,
   KER_INIT_PROCESS,
   ProcessType
 } from "./os/ProcessType";
@@ -88,6 +94,9 @@ declare global {
     [KER_CREEP_HARVESTER_LIFETIME_PROCESS]: DefaultProcessMetaData & {
       source: string;
     },
+    [KER_CREEP_UPGRADER_LIFETIME_PROCESS]: DefaultProcessMetaData & {
+      controller: string;
+    },
     [KER_CREEP_ACTION_HARVEST]: DefaultProcessMetaData & {
       source: string;
     },
@@ -95,7 +104,19 @@ declare global {
       structure: string;
     },
     [KER_CREEP_ACTION_DROP_RESOURCES]: DefaultProcessMetaData & {
-      spawner: string;
+      target: string;
+    },
+    [KER_COL_CONTROLLER_PROCESS]: DefaultProcessMetaData & {
+      controller: string;
+      creeps: Array<string>;
+      nextCreepName: string | null;
+    },
+    [KER_CREEP_ACTION_UPGRADE_CONTROLLER]: DefaultProcessMetaData & {
+      controller: string;
+    },
+    [KER_CREEP_ACTION_PULL_RESOURCE]: DefaultProcessMetaData & {
+      target: string,
+      resource: ResourceConstant
     }
   }
 
