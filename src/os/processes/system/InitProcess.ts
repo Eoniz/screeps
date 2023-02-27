@@ -5,7 +5,6 @@ import {RoomUtils} from "../../../utils/RoomUtils";
 export class InitProcess extends Process<'init'> {
 
   protected preRun(): void {
-    this.log("preRun() called");
   }
 
   protected run(): void {
@@ -46,8 +45,6 @@ export class InitProcess extends Process<'init'> {
   }
 
   protected postRun(): void {
-    this.log("postRun() called");
-
     this.completed();
   }
 }

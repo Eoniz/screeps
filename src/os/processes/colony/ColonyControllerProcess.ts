@@ -119,7 +119,7 @@ export class ColonyControllerProcess extends Process<'colony-controller-process'
       this.kernel.addProcess(
         KER_CREEP_UPGRADER_LIFETIME_PROCESS,
         `creep-lifetime-${this.metaData.nextCreepName}`,
-        70,
+        90,
         {
           roomName: this._controller.room.name,
           controller: this._controller.id,

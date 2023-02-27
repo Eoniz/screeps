@@ -2,6 +2,7 @@ import {Process} from "../../Process";
 import {ColonyProcess} from "./ColonyProcess";
 import {KER_COL_PROCESS, KER_CREEP_HARVESTER_LIFETIME_PROCESS} from "../../ProcessType";
 import {Colony, STATE_SPAWNING} from "../../../screeps/Colony";
+import * as console from "console";
 
 export class ColonySourceProcess extends Process<'colony-source-process'> {
 
@@ -87,9 +88,6 @@ export class ColonySourceProcess extends Process<'colony-source-process'> {
     }
 
     if (colony.checkSpawningQueue(this.name) === STATE_SPAWNING) {
-      this.log("🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡🟡");
-
-      this.log("spawning queue === STATE_SPAWNING");
       if (!this.metaData.nextCreepName) {
         this.metaData.nextCreepName = null;
         return;
@@ -108,7 +106,7 @@ export class ColonySourceProcess extends Process<'colony-source-process'> {
       this.kernel.addProcess(
         KER_CREEP_HARVESTER_LIFETIME_PROCESS,
         `creep-lifetime-${this.metaData.nextCreepName}`,
-        80,
+        Math.max(50, 90 - (this.metaData.creeps.length * 10)),
         {
           roomName: source.room.name,
           source: source.id,
@@ -145,14 +143,17 @@ export class ColonySourceProcess extends Process<'colony-source-process'> {
 
     const positions: Array<RoomPosition> = [];
 
-    for (let y = source.pos.y - 1; y < source.pos.y + 1; y++) {
-      for (let x = source.pos.x - 1; x < source.pos.x + 1; x++) {
+    for (let y = source.pos.y - 1; y <= source.pos.y + 1; y++) {
+      for (let x = source.pos.x - 1; x <= source.pos.x + 1; x++) {
+        if (y === source.pos.y && x === source.pos.x) {
+          continue;
+        }
+
         if (
           area[y][x].length
           && ['plain', 'swamp'].includes(area[y][x][0].toString())
         ) {
           positions.push(new RoomPosition(x, y, source.room.name));
-          break;
         }
       }
     }
@@ -162,9 +163,9 @@ export class ColonySourceProcess extends Process<'colony-source-process'> {
       return;
     }
 
-    const position = positions[0];
-
-    position.createConstructionSite(STRUCTURE_CONTAINER);
+    for (const position of positions) {
+      position.createConstructionSite(STRUCTURE_CONTAINER);
+    }
   }
 
 }

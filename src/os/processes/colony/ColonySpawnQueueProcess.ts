@@ -54,8 +54,6 @@ export class ColonySpawnQueueProcess extends Process<'colony-spawn-queue'> {
       this.log(`Spawning a ${nextCreepToSpawn.type} with name ${nextCreepToSpawn.creepName} and identifier ${nextCreepToSpawn.identifier}`);
       spawner.memory.identifier = nextCreepToSpawn.identifier;
       colonyProcess.colony.removeCreepFromSpawnQueue(nextCreepToSpawn.identifier);
-    } else {
-      this.log(`Unable to spawn ${nextCreepToSpawn.type} for now`);
     }
   }
 

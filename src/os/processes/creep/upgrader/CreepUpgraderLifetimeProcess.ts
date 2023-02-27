@@ -51,11 +51,6 @@ export class CreepUpgraderLifetimeProcess extends CreepLifetimeProcess<'creep-up
         })
       );
 
-      console.log("✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨✨");
-      console.log(JSON.stringify(
-        containers.map((c) => ({ distance: creep.pos.getRangeTo(c), id: c.id }))
-      ));
-
       if (containers.length) {
         this.fork(
           KER_CREEP_ACTION_PULL_RESOURCE,

@@ -184,9 +184,7 @@ export abstract class CreepLifetimeProcess<T extends ProcessType> extends Proces
     }
 
     const maybeCreep = Game.creeps[this.metaData.creep];
-    console.log(JSON.stringify(Object.keys(Game.creeps)));
     if (!maybeCreep) {
-      console.log(`creep ${this.metaData.creep} not found in game.creeps`);
       this.completed();
       return null;
     }

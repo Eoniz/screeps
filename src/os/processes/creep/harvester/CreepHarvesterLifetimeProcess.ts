@@ -99,16 +99,20 @@ export class CreepHarvesterLifetimeProcess extends CreepLifetimeProcess<'creep-h
   }
 
   private checkForSpawnQueue(creep: Creep, room: Room) {
-    this.log("👨‍🔬 spawn queue");
     if (!this.colony) {
       this.log("❌ no colony")
       return false;
     }
 
-    if (!this.colony.getNextCreepToSpawn()) {
+    const maybeNextCreep = this.colony.getNextCreepToSpawn();
+    if (!maybeNextCreep) {
       this.log("❌ no creep in queue")
 
       return false;
+    }
+
+    if (maybeNextCreep.priority < 90) {
+      return;
     }
 
     const sortedSpawners = (

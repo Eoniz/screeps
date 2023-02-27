@@ -7,12 +7,9 @@ export class ColonyProcess extends Process<'colony'> {
   private _colony!: Colony;
 
   protected preRun(): void {
-    this.log("preRun() called");
   }
 
   protected run(): void {
-    this.log("run() called");
-
     if (!this.room) {
       this.log("No room --> aborting");
 
